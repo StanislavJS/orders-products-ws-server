@@ -1,9 +1,15 @@
 import http from 'http';
 import { WebSocketServer } from 'ws';
 
-
-const server = http.createServer();
-
+const server = http.createServer((req, res) => {
+  if (req.url === '/') {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('WebSocket server is running');
+  } else {
+    res.writeHead(404);
+    res.end();
+  }
+});
 
 const wss = new WebSocketServer({ server });
 
@@ -23,7 +29,6 @@ wss.on('connection', (ws) => {
 
 function broadcastSessionCount() {
   const message = JSON.stringify({ type: 'session_count', count: sessionCount });
-
   wss.clients.forEach((client) => {
     if (client.readyState === 1) {
       client.send(message);
@@ -31,7 +36,6 @@ function broadcastSessionCount() {
   });
 }
 
-// Порт для Railway або локальний (8080)
 const PORT = process.env.PORT || 8080;
 
 server.listen(PORT, '0.0.0.0', () => {
